@@ -13,6 +13,10 @@ elseif Config.FrameWork == 'custom' then
     end)
 end
 
+if Config.Inventory == 'ox' then
+    local ox_inventory = exports.ox_inventory
+end
+
 local speed = 0
 local ModelsLoaded = false
 local intrain = false
