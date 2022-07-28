@@ -2,7 +2,7 @@ Config = {}
 
 Config.FrameWork = 'ESX' -- ESX / QBCore or Custom
 Config.TriggerFrameWork = "esx:getSharedObject" -- esx:getSharedObject / QBCore : exports['qb-core']:GetCoreObject()
-Config.Inventory = 'ch' -- ch = Cheeza Inventory / qb = QBCore basic inventory / custom / qs = Quasar Inventory
+Config.Inventory = 'ch' -- ch = Cheeza Inventory / qb = QBCore basic inventory / custom / qs = Quasar Inventory / ox = Ox_inventory
 
 function OpenStashTrainConfig(idtrain, storagekg, indexcontainer)
     if Config.Inventory == 'ch' then
@@ -24,6 +24,8 @@ function OpenStashTrainConfig(idtrain, storagekg, indexcontainer)
             maxweight = storagekg * 1000, -- Max Weight In Grams
             slots = 100, -- Max Slots
         })
+     elseif Config.Inventory == 'ox' then
+        exports.ox_inventory:openInventory('stash', {id="Train:"..idtrain.."Container:"..indexcontainer, owner="Train:"..idtrain})
     end
 end
 
