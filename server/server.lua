@@ -13,6 +13,10 @@ elseif Config.FrameWork == 'custom' then
     end)
 end
 
+if Config.Inventory == 'ox' then
+    local ox_inventory = exports.ox_inventory
+end
+
 RegisterNetEvent('az_train:newTrain')
 AddEventHandler('az_train:newTrain', function(trainmodelindex, stationachat, owneur, tablelong, station, modellabel, price)
     local canbuytrain = false
@@ -69,6 +73,11 @@ end)
 
 RegisterNetEvent('az_train:synchroCurrentTrainServer')
 AddEventHandler('az_train:synchroCurrentTrainServer', function(temptrain, ingarage, uniqueID, trainindex, station)
+    if Config.Inventory == 'ox' then
+        exports.ox_inventory:RegisterStash("Train:"..uniqueID.."Container:1", 'Train Container', 50, 100000, "Train:"..uniqueID)
+        exports.ox_inventory:RegisterStash("Train:"..uniqueID.."Container:2", 'Train Container', 50, 100000, "Train:"..uniqueID)
+        exports.ox_inventory:RegisterStash("Train:"..uniqueID.."Container:3", 'Train Container', 50, 100000, "Train:"..uniqueID)
+    end
     TriggerClientEvent('az_train:synchroCurrentTrainClient', -1, temptrain, ingarage, uniqueID, trainindex, station)
 end)
 
