@@ -455,6 +455,12 @@ RegisterCommand('removebomb', function()
     end
 end, false)
 
+RegisterCommand('getstationname', function()
+    local playercoords = GetEntityCoords(GetPlayerPed(-1))
+    local streetname = GetStreetNameFromHashKey(GetStreetNameAtCoord(playercoords.x, playercoords.y, playercoords.z))
+    print('Station name (replace in config.lua if not match) : '..streetname)         
+end, false)
+
 RegisterNetEvent('az_train:posebombclient')
 AddEventHandler('az_train:posebombclient', function(coordsbomb)
     table.insert(BombTrain, {coordsbomb = coordsbomb})
