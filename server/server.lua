@@ -1,6 +1,6 @@
 if Config.FrameWork == 'QBCore' then
     QBCore = nil
-    QBCore = Config.TriggerFrameWork
+    QBCore = exports['qb-core']:GetCoreObject()
 elseif Config.FrameWork == 'ESX' then
     ESX = nil
     TriggerEvent(Config.TriggerFrameWork, function(obj) 
@@ -17,7 +17,8 @@ RegisterNetEvent('az_train:newTrain')
 AddEventHandler('az_train:newTrain', function(trainmodelindex, stationachat, owneur, tablelong, station, modellabel, price)
     local canbuytrain = false
     if Config.FrameWork == 'QBCore' then
-        local Player = QBCore.Functions.GetPlayer(source)
+        local src = source
+        local Player = QBCore.Functions.GetPlayer(src)
         PlayerMoney = Player.PlayerData.money[Config.AccountForBuyTrain]
         if PlayerMoney >= price then
             Player.Functions.RemoveMoney(Config.AccountForBuyTrain, price)
