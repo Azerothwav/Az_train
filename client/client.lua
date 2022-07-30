@@ -1,6 +1,6 @@
 if Config.FrameWork == 'QBCore' then
     QBCore = nil
-    QBCore = Config.TriggerFrameWork
+    QBCore = exports['qb-core']:GetCoreObject()
 elseif Config.FrameWork == 'ESX' then
     ESX = nil
     TriggerEvent(Config.TriggerFrameWork, function(obj) 
