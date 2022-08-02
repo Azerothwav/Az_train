@@ -401,7 +401,7 @@ Citizen.CreateThread(function()
                     if IsControlJustReleased(0, 38) then
                         for x, w in pairs(CurrentTrain) do
                             if w.entity == traintodelete then
-                                if GetDistanceBetweenCoords(playercoords, v.garagecoords, true) < 30 then
+                                if k == tonumber(w.station) then
                                     DeleteMissionTrain(traintodelete)
                                     CurrentTrain[x] = nil
                                 else
