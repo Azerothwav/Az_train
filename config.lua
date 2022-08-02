@@ -33,7 +33,7 @@ Config.MaxVitesseTrain = 27 -- * 3.70 for the real vitesse (27 * 3.70 = 100km/h)
 Config.AccountForBuyTrain = 'bank'
 
 Config.Stations = {
-    ['Señora Freeway'] = {
+    [1] = {
         garagecoords = vector3(2632.45, 2935.39, 40.42),
         coordsdeletetrain = vector3(2625.52, 2947.76, 40.67),
         path = {
@@ -60,7 +60,7 @@ Config.Stations = {
             }
         }
     },
-    ['Great Ocean Highway'] = {
+    [2] = {
         garagecoords = vector3(-139.59, 6148.56, 32.34),
         coordsspawn = vector3(-140.46, 6141.85, 31.58),
         coordsdeletetrain = vector3(-142.70, 6144.80, 32.23),
@@ -85,7 +85,7 @@ Config.Stations = {
             }
         }
     },
-    ['Chum Street'] = {
+    [3] = {
         garagecoords = vector3(193.23, -2503.9, 7.24),
         coordsspawn = vector3(217.6, -2471.28, 6.49),
         coordsdeletetrain = vector3(219.2, -2512.77, 7.24),
