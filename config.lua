@@ -188,5 +188,8 @@ Config.Lang = {
     ["AlreadyBomb"] = 'A bomb is already planted',
     ["TooFastToLeaveTrain"] = 'You are going too fast to get off the train',
     ["CantBuyTrain"] = 'You can\'t afford this train',
-    ["AlreadyOut"] = 'Train already out'
+    ["AlreadyOut"] = 'Train already out',
+    
+    -- Subway DLC Translation
+    ["Subway"] = 'Subway'
 }
