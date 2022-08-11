@@ -18,7 +18,7 @@ if Config.Inventory == 'ox' then
 end
 
 local speed = 0
-local ModelsLoaded = false
+ModelsLoaded = false
 local intrain = false
 local trainfreezequaie = false
 local lastcoordstrail = nil
