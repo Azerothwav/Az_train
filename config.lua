@@ -119,7 +119,16 @@ Config.TrainShop = {
             {label = 'Oil Train', indextrain = 19, price = 5000},
             {label = 'Cargo Train', indextrain = 20, price = 5000}
         }
+    },
+    
+    --[[ Remove comment for use the Subway Shop
+    ["SubWayStock"] = {
+        coordspnj = vector4(-1105.38, -2744.7, -7.41, 0.47),
+        traintobuy = {
+            {label = 'Metro', indextrain = 25, price = 5000}
+        }
     }
+    ]]
 }
 
 function SendServerNotification(msg)
