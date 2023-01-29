@@ -20,22 +20,6 @@ if Config.FrameWork == 'QBCore' then
         cb(trainOwned)
     end)
 
-    QBCore.Functions.CreateCallback("az_train:buyTrain", function(source, cb, data)
-        local Player = QBCore.Functions.GetPlayer(source)
-        data["owner"] = Player.PlayerData.citizenid
-        data["uniqueID"] = #trainTable + 1
-        data["station"] = 1
-        data["state"] = "in"
-        PlayerMoney = Player.PlayerData.money["bank"]
-        if PlayerMoney >= data.price then
-            Player.Functions.RemoveMoney("bank", data.price)
-            table.insert(trainTable, data)
-            cb(true)
-        else
-            cb(false)
-        end
-    end)
-
     QBCore.Functions.CreateUseableItem('train_bomb', function(source, item)
         local Player = QBCore.Functions.GetPlayer(source)
         if not Player.Functions.GetItemByName(item.name) then return end
@@ -62,21 +46,6 @@ elseif Config.FrameWork == 'ESX' then
         cb(trainOwned)
     end)
 
-    ESX.RegisterServerCallback("az_train:buyTrain", function(source, cb, data)
-        local xPlayer = ESX.GetPlayerFromId(source)
-        data["owner"] = xPlayer.identifier
-        data["uniqueID"] = #trainTable + 1
-        data["station"] = 1
-        data["state"] = "in"
-        if xPlayer.getAccount("bank").money >= data.price then
-            xPlayer.removeAccountMoney("bank", data.price)
-            table.insert(trainTable, data)
-            cb(true, data)
-        else
-            cb(false)
-        end
-    end)
-
     ESX.RegisterUsableItem('train_bomb', function(source)
         local xPlayer = ESX.GetPlayerFromId(source)
         xPlayer.removeInventoryItem('train_bomb', 1)
@@ -89,6 +58,60 @@ elseif Config.FrameWork == 'custom' then
         CustomFramWork = obj 
     end)
 end
+
+RegisterNetEvent("az_train:buyTrain", function(data)
+    if Config.FrameWork == "ESX" then
+        local xPlayer = ESX.GetPlayerFromId(source)
+        data["owner"] = xPlayer.identifier
+        data["uniqueID"] = #trainTable + 1
+        data["station"] = 1
+        data["state"] = "in"
+        if xPlayer.getAccount("bank").money >= data.price then
+            xPlayer.removeAccountMoney("bank", data.price)
+            table.insert(trainTable, data)
+            TriggerClientEvent("az_train:newTrain", source, data)
+        else
+            xPlayer.showNotification(Config.Lang["CantBuyTrain"])
+        end
+    elseif Config.FrameWork == "QBCore" then
+        local Player = QBCore.Functions.GetPlayer(source)
+        data["owner"] = Player.PlayerData.citizenid
+        data["uniqueID"] = #trainTable + 1
+        data["station"] = 1
+        data["state"] = "in"
+        PlayerMoney = Player.PlayerData.money["bank"]
+        if PlayerMoney >= data.price then
+            Player.Functions.RemoveMoney("bank", data.price)
+            table.insert(trainTable, data)
+            TriggerClientEvent("az_train:newTrain", source, data)
+        else
+            TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Config.Lang["CantBuyTrain"], 'error')
+        end
+    elseif Config.FrameWork == "custom" then
+        local identifier = GetPlayerIdentifiers(source)
+        local license = nil
+        for k, v in pairs(identifier) do if string.find(v, "license:") then license = string.gsub(v, "license:", "") end end
+        data["owner"] = license
+        data["uniqueID"] = #trainTable + 1
+        data["station"] = 1
+        data["state"] = "in"
+        TriggerClientEvent("az_train:newTrain", source, data)
+        table.insert(trainTable, data)
+    end
+end)
+
+RegisterNetEvent("az_train:getTrains", function()
+    local trainOwned = {}
+    local identifier = GetPlayerIdentifiers(source)
+    local license = nil
+    for k, v in pairs(identifier) do if string.find(v, "license:") then license = string.gsub(v, "license:", "") end end
+    for k, v in pairs(trainTable) do
+        if v.owner == license then
+            table.insert(trainOwned, v)
+        end
+    end
+    TriggerClientEvent("az_train:getTrains", source, trainOwned)
+end)
 
 RegisterNetEvent("az_train:changeState", function(uniqueID, state, lastStation)
     for k, v in pairs(trainTable) do
@@ -131,7 +154,7 @@ end)
 CreateThread(function()
     while true do
         Wait(3600000)
-        print("Sauvegarde de la table Train en JSON")
+        print("Save Train Table JSON")
         SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
     end
 end)

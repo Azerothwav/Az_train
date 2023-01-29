@@ -18,15 +18,28 @@ RageMenuTrain.Menu.Garage.Closed = function()
 end
 
 function loadData()
-    Config.CallBack("az_train:getMyTrain", function(result)
-        for k, v in pairs(result) do
-            ownedTrain[k] = {}
-            for x, w in pairs(v) do
-                ownedTrain[k][x] = w
+    if Config.FrameWork == "custom" then
+        TriggerServerEvent("az_train:getTrains")
+    else
+        Config.CallBack("az_train:getMyTrain", function(result)
+            for k, v in pairs(result) do
+                ownedTrain[k] = {}
+                for x, w in pairs(v) do
+                    ownedTrain[k][x] = w
+                end
             end
-        end
-    end)
+        end)
+    end
 end
+
+RegisterNetEvent("az_train:getTrains", function(result)
+    for k, v in pairs(result) do
+        ownedTrain[k] = {}
+        for x, w in pairs(v) do
+            ownedTrain[k][x] = w
+        end
+    end
+end)
 
 AddEventHandler("onResourceStop", function(resourceName)
     if resourceName == GetCurrentResourceName() then
@@ -47,6 +60,12 @@ AddEventHandler("onResourceStart", function(resourceName)
     end
 end)
 
+RegisterNetEvent("az_train:newTrain", function(data)
+    table.insert(ownedTrain, data)
+    Config.SendNotification(Config.Lang["Bought"]..data.label)
+    Config.SendNotification(string.format(Config.Lang["TrainStockIn"], Config.Stations[1].label))
+end)
+
 function openMenu(index)
     RageMenuTrain.Menu.IsOpen = true
     local lastTrainIndex = nil
@@ -57,16 +76,8 @@ function openMenu(index)
                     if w.trainindex == v then
                         RageUI.Button(w.label, Config.CanAccess(Config.TrainShop[index].job) and string.format(Config.Lang["TrainInfos"], w.price, w.storage) or Config.Lang["AccessDenied"], {}, Config.CanAccess(Config.TrainShop[index].job), {
                             onSelected = function()
-                                Config.CallBack("az_train:buyTrain", function(haveBuy, data)
-                                    if haveBuy then
-                                        RageMenuTrain.Menu.Shop.Closed()
-                                        table.insert(ownedTrain, data)
-                                        Config.SendNotification(Config.Lang["Bought"]..w.label)
-                                        Config.SendNotification(string.format(Config.Lang["TrainStockIn"], Config.Stations[1].label))
-                                    else
-                                        Config.SendNotification(Config.Lang["CantBuyTrain"])
-                                    end
-                                end, w)
+                                TriggerServerEvent("az_train:buyTrain", w)
+                                RageMenuTrain.Menu.Shop.Closed()
                             end
                         })
                     end
