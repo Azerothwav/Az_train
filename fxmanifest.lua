@@ -36,9 +36,9 @@ client_scripts {
     'lib/menu/elements/ItemsColour.lua',
     'lib/menu/elements/PanelColour.lua',
     
-    'client/*.lua',
-    'DLC/**/client/*.lua',
-    'OwnedTrain/*.lua',
+    'client/framework.lua',
+    'client/main.lua',
+    'DLC/**/client/*.lua'
 }
 
 server_scripts {
