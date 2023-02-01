@@ -135,6 +135,12 @@ end
 
 RegisterNetEvent("az_train:syncAction", function(uniqueID, storage, vehNet)
     local tempTrain = NetToVeh(vehNet)
+    local maxSpeed = 27
+    for k, v in pairs(ownedTrain) do
+        if v.uniqueID == uniqueID then
+            maxSpeed = v.maxSpeed
+        end
+    end
     Citizen.CreateThread(function()
         while DoesEntityExist(tempTrain) do
             local wait = 1000
@@ -168,7 +174,7 @@ RegisterNetEvent("az_train:syncAction", function(uniqueID, storage, vehNet)
                                 SetTrainCruiseSpeed(tempTrain, speed)
                                 TaskLeaveVehicle(PlayerPedId(), tempTrain, 0)
                             end
-                            if IsControlPressed(0,71) then
+                            if IsControlPressed(0,71) and speed < maxSpeed then
                                 speed = speed + 0.02
                             elseif IsControlPressed(0,72) and speed > -1 then
                                 speed = speed - 0.05

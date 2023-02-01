@@ -30,13 +30,15 @@ Config.Trains = {
         trainindex = 19,
         label = 'Oil Train',
         storage = 15000,
-        price = 5000
+        price = 5000,
+        maxSpeed = 27 -- * 3.70 for the real vitesse (27 * 3.70 = 100km/h)
     },
     [2] = {
         trainindex = 20,
         label = 'Cargo Train',
         storage = 30000,
-        price = 5000
+        price = 5000,
+        maxSpeed = 27 -- * 3.70 for the real vitesse (27 * 3.70 = 100km/h)
     }
 }
 
@@ -116,13 +118,17 @@ Config.Job = {
 }
 
 Config.CanAccess = function(jobname)
-    local canAccess = false
-    for k, v in pairs(Config.Job) do
-        if v() == jobname then
-            canAccess = true
+    if jobname ~= nil then
+        local canAccess = false
+        for k, v in pairs(Config.Job) do
+            if v() == jobname then
+                canAccess = true
+            end
         end
+        return canAccess
+    else
+        return true
     end
-    return canAccess
 end
 
 Config.SendServerNotification = function(msg)
