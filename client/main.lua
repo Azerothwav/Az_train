@@ -134,62 +134,68 @@ function getOutTrain(uniqueID, coords)
 end
 
 RegisterNetEvent("az_train:syncAction", function(uniqueID, storage, vehNet)
-    local tempTrain = NetToVeh(vehNet)
-    local maxSpeed = 27
-    for k, v in pairs(ownedTrain) do
-        if v.uniqueID == uniqueID then
-            maxSpeed = v.maxSpeed
-        end
-    end
     Citizen.CreateThread(function()
-        while DoesEntityExist(tempTrain) do
-            local wait = 1000
-            if GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), GetEntityCoords(tempTrain), true) < 7 and not IsPedInAnyVehicle(PlayerPedId(), true) then
-                wait = 0
-                Config.HelpNotification(Config.Lang["TrainInfo"])
-                if IsControlJustReleased(0, 23) then
-                    SetPedIntoVehicle(PlayerPedId(), tempTrain, -1)
-                    Citizen.Wait(1000)
-                    local speed = 0
-                    Citizen.CreateThread(function()
-                        while GetPedInVehicleSeat(tempTrain, -1) == PlayerPedId() do
-                            local wait2 = 1000
-                            for x, w in pairs(Config.Stations) do
-                                if GetDistanceBetweenCoords(GetEntityCoords(tempTrain), w.coordsdeletetrain, true) < 20 then
-                                    wait2 = 0
-                                    Config.HelpNotification(Config.Lang["StowTrain"])
-                                    if IsControlJustReleased(0, 38) then
-                                        DeleteMissionTrain(tempTrain)
-                                        TriggerServerEvent("az_train:changeState", uniqueID, "in", x)
+        local tempTrain = NetToVeh(vehNet)
+        while tempTrain == 0 do
+            tempTrain = NetToVeh(vehNet)
+            Citizen.Wait(1000)
+        end
+        local maxSpeed = 27
+        for k, v in pairs(ownedTrain) do
+            if v.uniqueID == uniqueID then
+                maxSpeed = v.maxSpeed
+            end
+        end
+        Citizen.CreateThread(function()
+            while DoesEntityExist(tempTrain) do
+                local wait = 1000
+                if GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), GetEntityCoords(tempTrain), true) < 7 and not IsPedInAnyVehicle(PlayerPedId(), true) then
+                    wait = 0
+                    Config.HelpNotification(Config.Lang["TrainInfo"])
+                    if IsControlJustReleased(0, 23) then
+                        SetPedIntoVehicle(PlayerPedId(), tempTrain, -1)
+                        Citizen.Wait(1000)
+                        local speed = 0
+                        Citizen.CreateThread(function()
+                            while GetPedInVehicleSeat(tempTrain, -1) == PlayerPedId() do
+                                local wait2 = 1000
+                                for x, w in pairs(Config.Stations) do
+                                    if GetDistanceBetweenCoords(GetEntityCoords(tempTrain), w.coordsdeletetrain, true) < 20 then
+                                        wait2 = 0
+                                        Config.HelpNotification(Config.Lang["StowTrain"])
+                                        if IsControlJustReleased(0, 38) then
+                                            DeleteMissionTrain(tempTrain)
+                                            TriggerServerEvent("az_train:changeState", uniqueID, "in", x)
+                                        end
                                     end
                                 end
+                                Citizen.Wait(wait2)
                             end
-                            Citizen.Wait(wait2)
-                        end
-                    end)
-                    Citizen.CreateThread(function()
-                        while GetPedInVehicleSeat(tempTrain, -1) == PlayerPedId() do
-                            if IsControlJustReleased(0, 23) then
-                                speed = 0
+                        end)
+                        Citizen.CreateThread(function()
+                            while GetPedInVehicleSeat(tempTrain, -1) == PlayerPedId() do
+                                if IsControlJustReleased(0, 23) then
+                                    speed = 0
+                                    SetTrainCruiseSpeed(tempTrain, speed)
+                                    TaskLeaveVehicle(PlayerPedId(), tempTrain, 0)
+                                end
+                                if IsControlPressed(0,71) and speed < maxSpeed then
+                                    speed = speed + 0.02
+                                elseif IsControlPressed(0,72) and speed > -1 then
+                                    speed = speed - 0.05
+                                end
                                 SetTrainCruiseSpeed(tempTrain, speed)
-                                TaskLeaveVehicle(PlayerPedId(), tempTrain, 0)
+                                Citizen.Wait(0)
                             end
-                            if IsControlPressed(0,71) and speed < maxSpeed then
-                                speed = speed + 0.02
-                            elseif IsControlPressed(0,72) and speed > -1 then
-                                speed = speed - 0.05
-                            end
-                            SetTrainCruiseSpeed(tempTrain, speed)
-                            Citizen.Wait(0)
-                        end
-                    end)
+                        end)
+                    end
+                    if IsControlJustReleased(0, 74) then
+                        Config.OpenStash(uniqueID, storage)
+                    end
                 end
-                if IsControlJustReleased(0, 74) then
-                    Config.OpenStash(uniqueID, storage)
-                end
+                Citizen.Wait(wait)
             end
-            Citizen.Wait(wait)
-        end
+        end)
     end)
 end)
 
