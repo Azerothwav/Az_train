@@ -85,10 +85,10 @@ Config.TrainShop = {
     
     --[[ Remove comment for use the Subway Shop
     ["SubWayStock"] = {
+	pedmodel = "g_m_m_armgoon_01",
         coordspnj = vector4(-1105.38, -2744.7, -7.41, 0.47),
-        traintobuy = {
-            {label = 'Metro', indextrain = 25, price = 5000}
-        }
+        traintobuy = {19, 20},
+	job = "police" -- Remove this line if none
     }
     ]]
 }
