@@ -1,5 +1,46 @@
 local trainTable = {}
 
+local sizeTableToSave = 0
+AddEventHandler("onResourceStart", function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        local result = json.decode(LoadResourceFile(GetCurrentResourceName(), "trains.json"))
+        if result ~= nil then
+            for k, v in pairs(result) do
+                trainTable[k] = {}
+                if v.state == "out" then v.state = "in" end
+                for x, w in pairs(v) do
+                    trainTable[k][x] = w
+                end
+                if Config.Inventory == "ox" then
+                    exports.ox_inventory:RegisterStash("Train:"..v.uniqueID, 'Stockage train n°: '..v.uniqueID, 50, v.storage * 1000, "Train:"..v.uniqueID)
+                end
+            end
+            sizeTableToSave = #trainTable
+        end
+    end
+end)
+
+CreateThread(function()
+    while true do
+        Wait(3600000)
+        if sizeTableToSave ~= #trainTable then
+            sizeTableToSave = #trainTable
+            print("Save Train Table JSON")
+            SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
+        end
+    end
+end)
+
+AddEventHandler('txAdmin:events:serverShuttingDown', function(eventData)
+    SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
+end)
+
+AddEventHandler("onResourceStop", function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
+    end
+end)
+
 if Config.FrameWork == 'QBCore' then
     QBCore = exports['qb-core']:GetCoreObject()
 
@@ -19,12 +60,18 @@ if Config.FrameWork == 'QBCore' then
         end
         cb(trainOwned)
     end)
-
+    
     QBCore.Functions.CreateUseableItem('train_bomb', function(source, item)
         local Player = QBCore.Functions.GetPlayer(source)
         if not Player.Functions.GetItemByName(item.name) then return end
         TriggerClientEvent("az_train:poseBomb", source)
         TriggerClientEvent("az_train:poseBombAll", -1, GetEntityCoords(GetPlayerPed(source)))
+    end)
+
+    QBCore.Functions.CreateUseableItem('train_repairkit', function(source, item)
+        local Player = QBCore.Functions.GetPlayer(source)
+        if not Player.Functions.GetItemByName(item.name) then return end
+        TriggerClientEvent("az_train:repairTrain", source)
     end)
 elseif Config.FrameWork == 'ESX' then
     ESX = exports['es_extended']:getSharedObject()
@@ -52,38 +99,54 @@ elseif Config.FrameWork == 'ESX' then
         TriggerClientEvent("az_train:poseBomb", source)
         TriggerClientEvent("az_train:poseBombAll", -1, GetEntityCoords(GetPlayerPed(source)))
     end)
-elseif Config.FrameWork == 'custom' then
-    CustomFramWork = nil
-    TriggerEvent(Config.TriggerFrameWork, function(obj) 
-        CustomFramWork = obj 
+
+    ESX.RegisterUsableItem('train_repairkit', function(source)
+        local xPlayer = ESX.GetPlayerFromId(source)
+        xPlayer.removeInventoryItem('train_repairkit', 1)
+        TriggerClientEvent("az_train:repairTrain", source)
     end)
+elseif Config.FrameWork == 'custom' then
+    
+end
+
+function getAStation(metro)
+    local index = 1
+    for k, v in pairs(Config.Stations) do
+        if not metro then
+            if v.metrostation == nil or not v.metrostation then
+                index = k
+                break
+            end
+        else
+            if v.metrostation ~= nil and v.metrostation then
+                index = k
+                break
+            end
+        end
+    end
+    return index
 end
 
 RegisterNetEvent("az_train:buyTrain", function(data)
+    data["uniqueID"] = #trainTable + 1
+    data["station"] = getAStation(data.trainindex == 25)
+    data["state"] = "in"
     if Config.FrameWork == "ESX" then
         local xPlayer = ESX.GetPlayerFromId(source)
         data["owner"] = xPlayer.identifier
-        data["uniqueID"] = #trainTable + 1
-        data["station"] = 1
-        data["state"] = "in"
         if xPlayer.getAccount("bank").money >= data.price then
             xPlayer.removeAccountMoney("bank", data.price)
             table.insert(trainTable, data)
-            TriggerClientEvent("az_train:newTrain", source, data)
         else
             xPlayer.showNotification(Config.Lang["CantBuyTrain"])
         end
     elseif Config.FrameWork == "QBCore" then
         local Player = QBCore.Functions.GetPlayer(source)
         data["owner"] = Player.PlayerData.citizenid
-        data["uniqueID"] = #trainTable + 1
-        data["station"] = 1
-        data["state"] = "in"
         PlayerMoney = Player.PlayerData.money["bank"]
         if PlayerMoney >= data.price then
             Player.Functions.RemoveMoney("bank", data.price)
             table.insert(trainTable, data)
-            TriggerClientEvent("az_train:newTrain", source, data)
         else
             TriggerClientEvent('QBCore:Notify', Player.PlayerData.source, Config.Lang["CantBuyTrain"], 'error')
         end
@@ -92,12 +155,9 @@ RegisterNetEvent("az_train:buyTrain", function(data)
         local license = nil
         for k, v in pairs(identifier) do if string.find(v, "license:") then license = string.gsub(v, "license:", "") end end
         data["owner"] = license
-        data["uniqueID"] = #trainTable + 1
-        data["station"] = 1
-        data["state"] = "in"
-        TriggerClientEvent("az_train:newTrain", source, data)
         table.insert(trainTable, data)
     end
+    TriggerClientEvent("az_train:newTrain", source, data)
 end)
 
 RegisterNetEvent("az_train:getTrains", function()
@@ -120,6 +180,7 @@ RegisterNetEvent("az_train:changeState", function(uniqueID, state, lastStation)
             if lastStation ~= nil then
                 v.station = lastStation
             end
+            break
         end
     end
     TriggerClientEvent("az_train:changeState", -1, uniqueID, state, lastStation)
@@ -131,40 +192,4 @@ end)
 
 RegisterNetEvent("az_train:removeBomb", function(position)
     TriggerClientEvent("az_train:removeBomb", -1, position)
-end)
-
-AddEventHandler("onResourceStart", function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        local result = json.decode(LoadResourceFile(GetCurrentResourceName(), "trains.json"))
-        if result ~= nil then
-            for k, v in pairs(result) do
-                trainTable[k] = {}
-                if v.state == "out" then v.state = "in" end
-                for x, w in pairs(v) do
-                    trainTable[k][x] = w
-                end
-                if Config.Inventory == "ox" then
-                    exports.ox_inventory:RegisterStash("Train:"..v.uniqueID, 'Stockage train n°: '..v.uniqueID, 50, v.storage * 1000, "Train:"..v.uniqueID)
-                end
-            end
-        end
-    end
-end)
-
-CreateThread(function()
-    while true do
-        Wait(3600000)
-        print("Save Train Table JSON")
-        SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
-    end
-end)
-
-AddEventHandler('txAdmin:events:serverShuttingDown', function(eventData)
-    SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
-end)
-
-AddEventHandler("onResourceStop", function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
-    end
 end)

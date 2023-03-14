@@ -16,6 +16,7 @@ if Config.FrameWork == 'QBCore' then
 		PlayerData = QBCore.Functions.GetPlayerData()
 		PlayerJob = PlayerData.job
 		PlayerGang = PlayerData.gang
+        loadData()
 	end)
 
     RegisterNetEvent('QBCore:Client:OnJobUpdate')
@@ -28,6 +29,7 @@ elseif Config.FrameWork == 'ESX' then
     RegisterNetEvent('esx:playerLoaded')
     AddEventHandler('esx:playerLoaded', function(xPlayer)
         ESX.PlayerData = xPlayer
+        loadData()
     end)
 
     RegisterNetEvent('esx:setJob')

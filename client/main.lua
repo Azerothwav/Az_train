@@ -18,6 +18,7 @@ RageMenuTrain.Menu.Garage.Closed = function()
 end
 
 function loadData()
+    Citizen.Wait(5000)
     if Config.FrameWork == "custom" then
         TriggerServerEvent("az_train:getTrains")
     else
@@ -63,7 +64,7 @@ end)
 RegisterNetEvent("az_train:newTrain", function(data)
     table.insert(ownedTrain, data)
     Config.SendNotification(Config.Lang["Bought"]..data.label)
-    Config.SendNotification(string.format(Config.Lang["TrainStockIn"], Config.Stations[1].label))
+    Config.SendNotification(string.format(Config.Lang["TrainStockIn"], Config.Stations[data.station].label))
 end)
 
 function openMenu(index)
@@ -86,6 +87,7 @@ function openMenu(index)
         end)
         RageUI.IsVisible(RageMenuTrain.Menu.Garage, function()
             for k, v in pairs(ownedTrain) do
+                if Config.Stations[index].metrostation ~= nil and Config.Stations[index].metrostation and v.trainindex ~= 25 then goto skipThisTrain end
                 if v.station == index then
                     RageUI.Button(string.format(Config.Lang["GetOutTrain"], v.label), string.format(Config.Lang["TrainInfos"], v.price, v.storage), {}, v.state == "in", {
                         onSelected = function()
@@ -95,6 +97,7 @@ function openMenu(index)
                         end
                     })
                 end
+                ::skipThisTrain::
             end 
         end)
         RageUI.IsVisible(RageMenuTrain.Menu.Path, function()
@@ -122,10 +125,12 @@ function getOutTrain(uniqueID, coords)
                 while not DoesEntityExist(tempTrain) do
                     Citizen.Wait(500)
                 end
+                NetworkRegisterEntityAsNetworked(tempTrain)
                 SetTrainSpeed(tempTrain, 0)
                 SetTrainCruiseSpeed(tempTrain, 0)
                 TriggerServerEvent("az_train:syncAction", v.uniqueID, v.storage, VehToNet(tempTrain))
                 TriggerServerEvent("az_train:changeState", v.uniqueID, "out")
+                break
             end
         end
     else
@@ -144,6 +149,7 @@ RegisterNetEvent("az_train:syncAction", function(uniqueID, storage, vehNet)
         for k, v in pairs(ownedTrain) do
             if v.uniqueID == uniqueID then
                 maxSpeed = v.maxSpeed
+                break
             end
         end
         Citizen.CreateThread(function()
@@ -213,7 +219,8 @@ Citizen.CreateThread(function()
     RequestModelSync("s_m_m_lsmetro_01")
     ModelsLoaded = true
 	for k, v in pairs (Config.TrainShop) do
-		v.blip = Config.CreateBlip(v.coordspnj.xyz, 0.5, Config.Lang["TrainShop"], 569, 0)
+        if not Config.UseMetro and v.metrostation then goto skipThisTrainShop end 
+		v.blip = Config.CreateBlip(v.coordspnj.xyz, 0.5, string.format(Config.Lang["TrainShop"], k), 569, 0)
         v.pnj = Config.CreatePNJ(v.coordspnj, v.pedmodel, false)
         Citizen.CreateThread(function()
             while true do
@@ -229,9 +236,11 @@ Citizen.CreateThread(function()
                 Citizen.Wait(wait)
             end
         end)
+        ::skipThisTrainShop::
 	end
     for k, v in pairs (Config.Stations) do
-		v.blip = Config.CreateBlip(v.coordspnj.xyz, 0.5, string.format(Config.Lang["TrainStation"], v.label), 309, 0)
+        if not Config.UseMetro and v.metrostation then goto skipThisStation end 
+		v.blip = Config.CreateBlip(v.coordspnj.xyz, 0.5, string.format(Config.Lang["TrainStation"], v.label), v.metrostation and 435 or 309, 0)
         v.pnj = Config.CreatePNJ(v.coordspnj, v.pedmodel, false)
         Citizen.CreateThread(function()
             while true do
@@ -247,6 +256,7 @@ Citizen.CreateThread(function()
                 Citizen.Wait(wait)
             end
         end)
+        ::skipThisStation::
 	end
 end)
 
@@ -270,7 +280,17 @@ RegisterNetEvent("az_train:removeBomb", function(position)
     for k, v in pairs(bombTable) do
         if v.position == position then
             DeleteEntity(v.object)
+            break
         end
+    end
+end)
+
+RegisterNetEvent("az_train:repairTrain", function()
+    Config.SendNotification(Config.Lang["RepairInProgress"])
+    local vehicle, distance = GetClosetVehicle()
+    if distance < 15 and GetVehicleClass(vehicle) == 21 then
+        SetRenderTrainAsDerailed(vehicle, false)
+        FreezeEntityPosition(vehicle, false)
     end
 end)
 
@@ -289,8 +309,9 @@ RegisterNetEvent("az_train:poseBombAll", function(position)
                 if GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), position, true) < 15 and GetVehiclePedIsIn(PlayerPedId(), false) ~= 0 and GetVehicleClass(GetVehiclePedIsIn(PlayerPedId(), false)) == 21 then
                     wait = 0
                     AddExplosion(position, 81, 50, true, false, true, true)
-                    SetRenderTrainAsDerailed(GetVehiclePedIsIn(PlayerPedId(), false))
-                    SetTrainCruiseSpeed(GetVehiclePedIsIn(PlayerPedId(), false),0)
+                    SetRenderTrainAsDerailed(GetVehiclePedIsIn(PlayerPedId(), false), true)
+                    SetTrainCruiseSpeed(GetVehiclePedIsIn(PlayerPedId(), false), 0)
+                    FreezeEntityPosition(GetVehiclePedIsIn(PlayerPedId(), false), true)
                     TriggerServerEvent("az_train:removeBomb", position)
                 elseif GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), position, true) < 2 then
                     wait = 0
@@ -312,4 +333,21 @@ function RequestModelSync(mod)
     while not HasModelLoaded(tempmodel) do
         Citizen.Wait(1)
     end
+end
+
+function GetClosetVehicle()
+    local vehicle = 0
+    local distance = 100
+
+    local pPos = GetEntityCoords(PlayerPedId())
+    for k, v in pairs(GetGamePool("CVehicle")) do
+        local position = GetEntityCoords(v)
+        local distanceToVehicle = GetDistanceBetweenCoords(pPos, position, true)
+        if distanceToVehicle < distance then
+            vehicle = v
+            distance = distanceToVehicle
+        end
+    end
+
+    return vehicle, distance
 end
