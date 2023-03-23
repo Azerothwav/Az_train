@@ -42,6 +42,7 @@ client_scripts {
 }
 
 server_scripts {
-    "server/*.lua",
+    "server/main.lua",
+    "server/eventTrain.lua",
     "DLC/**/server/*.lua"
 }
