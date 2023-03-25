@@ -2,8 +2,7 @@ fx_version "adamant"
 game "gta5"
 
 shared_scripts {
-    "config.lua",
-    "DLC/**/config.lua"
+    "config.lua"
 }
 
 client_scripts {
@@ -38,11 +37,11 @@ client_scripts {
     
     'client/framework.lua',
     'client/main.lua',
-    'DLC/**/client/*.lua'
+    'client/metro.lua',
+    'client/eventTrain.lua'
 }
 
 server_scripts {
     "server/main.lua",
-    "server/eventTrain.lua",
-    "DLC/**/server/*.lua"
+    "server/eventTrain.lua"
 }
