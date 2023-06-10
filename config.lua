@@ -43,7 +43,7 @@ Config.Trains = {
         maxSpeed = 27 -- * 3.70 for the real vitesse (27 * 3.70 = 100km/h)
     },
     [3] = {
-        trainindex = 25,
+        trainindex = 25, -- Change this by 26 for game build 2802
         label = 'Metro Train',
         storage = 30000,
         price = 5000,
