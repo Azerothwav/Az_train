@@ -3,8 +3,8 @@ local ownedTrain, bombTable, ModelsLoaded = {}, {}, false
 RageMenuTrain = {}
 RageMenuTrain.Menu = {}
 RageMenuTrain.Menu.IsOpen = false
-RageMenuTrain.Menu.Shop = RageUI.CreateMenu("", Config.Lang["TrainShop"], nil, nil, "root_cause", "shopui_title_elitastravel")
-RageMenuTrain.Menu.Garage = RageUI.CreateMenu("", Config.Lang["TrainStation"], nil, nil, "root_cause", "shopui_title_elitastravel")
+RageMenuTrain.Menu.Shop = RageUI.CreateMenu("", "Train Shop", nil, nil, "root_cause", "shopui_title_elitastravel")
+RageMenuTrain.Menu.Garage = RageUI.CreateMenu("", "Train Station", nil, nil, "root_cause", "shopui_title_elitastravel")
 RageMenuTrain.Menu.Path = RageUI.CreateSubMenu(RageMenuTrain.Menu.Garage, "", Config.Lang["ChooseTrail"], nil, nil, "root_cause", "shopui_title_elitastravel")
 
 RageMenuTrain.Menu.Shop.Closed = function()
