@@ -12,7 +12,9 @@ AddEventHandler("onResourceStart", function(resourceName)
                     trainTable[k][x] = w
                 end
                 if Config.Inventory == "ox" then
-                    exports.ox_inventory:RegisterStash("Train:"..v.uniqueID, 'Stockage train n°: '..v.uniqueID, 50, v.storage * 1000, "Train:"..v.uniqueID)
+                    for i = 0, 100 do
+                        exports.ox_inventory:RegisterStash("Train:"..v.uniqueID.."-carriage:"..i, "Stockage train n°: "..v.uniqueID..", trailer n°: "..i, 50, v.storage * 1000, "Train:"..v.uniqueID.."-carriage:"..i)
+                    end
                 end
             end
             sizeTableToSave = #trainTable

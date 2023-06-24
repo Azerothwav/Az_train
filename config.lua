@@ -2,26 +2,27 @@ Config = {}
 
 Config.FrameWork = 'ESX' -- ESX / QBCore or Custom
 Config.Inventory = 'ox' -- ch = Cheeza Inventory / qb = QBCore basic inventory / custom / qs = Quasar Inventory / ox = Ox_inventory
+Config.DrawMakerStockage = true -- Choose to draw a marker at the location of each storage for trailers
 
 Config.UseMetro = false
 Config.useEventTrain = false
 
-Config.OpenStash = function(uniqueID, storagekg)
+Config.OpenStash = function(uniqueID, storagekg, carriage)
     if Config.Inventory == 'ch' then
-        TriggerEvent('inventory:openHouse', "Train:"..uniqueID, "Train:"..uniqueID, "", storagekg)
+        TriggerEvent('inventory:openHouse', "Train:"..uniqueID.."-carriage:"..carriage, "Train:"..uniqueID.."-carriage:"..carriage, "", storagekg)
     elseif Config.Inventory == 'qb' then
-        TriggerServerEvent("inventory:server:OpenInventory", "stash", "Train:"..uniqueID, {
+        TriggerServerEvent("inventory:server:OpenInventory", "stash", "Train:"..uniqueID.."-carriage:"..carriage, {
             maxweight = storagekg * 1000,
             slots = 50,
             })
-        TriggerEvent("inventory:client:SetCurrentStash", "Train:"..uniqueID)
+        TriggerEvent("inventory:client:SetCurrentStash", "Train:"..uniqueID.."-carriage:"..carriage)
     elseif Config.Inventory == 'qs' then
-        TriggerServerEvent("inventory:server:OpenInventory", "stash", "Train:"..uniqueID, {
+        TriggerServerEvent("inventory:server:OpenInventory", "stash", "Train:"..uniqueID.."-carriage:"..carriage, {
             maxweight = storagekg * 1000, -- Max Weight In Grams
             slots = 100, -- Max Slots
         })
      elseif Config.Inventory == 'ox' then
-        exports.ox_inventory:openInventory('stash', {id="Train:"..uniqueID, owner="Train:"..uniqueID})
+        exports.ox_inventory:openInventory('stash', {id="Train:"..uniqueID.."-carriage:"..carriage, owner="Train:"..uniqueID.."-carriage:"..carriage})
     elseif Config.Inventory == 'custom' then
 
     end
