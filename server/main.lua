@@ -131,7 +131,7 @@ end
 
 RegisterNetEvent("az_train:buyTrain", function(data)
     data["uniqueID"] = #trainTable + 1
-    data["station"] = getAStation(data.trainindex == 25)
+    data["station"] = getAStation(data.trainindex == 25 or data.trainindex == 26)
     data["state"] = "in"
     if Config.FrameWork == "ESX" then
         local xPlayer = ESX.GetPlayerFromId(source)
