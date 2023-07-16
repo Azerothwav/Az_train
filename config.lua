@@ -4,6 +4,7 @@ Config.FrameWork = 'ESX' -- ESX / QBCore or Custom
 Config.Inventory = 'ox' -- ch = Cheeza Inventory / qb = QBCore basic inventory / custom / qs = Quasar Inventory / ox = Ox_inventory
 Config.DrawMakerStockage = true -- Choose to draw a marker at the location of each storage for trailers
 
+Config.MetroIndex = 25 -- Change this by 26 for game build 2802
 Config.UseMetro = false
 Config.useEventTrain = false
 
@@ -44,7 +45,7 @@ Config.Trains = {
         maxSpeed = 27 -- * 3.70 for the real vitesse (27 * 3.70 = 100km/h)
     },
     [3] = {
-        trainindex = 25, -- Change this by 26 for game build 2802
+        trainindex = Config.MetroIndex,
         label = 'Metro Train',
         storage = 30000,
         price = 5000,
@@ -227,7 +228,7 @@ Config.TrainShop = {
         metrostation = true,
         pedmodel = "g_m_m_armgoon_01",
         coordspnj = vector4(-1105.38, -2744.7, -7.41, 0.47),
-        traintobuy = {25},
+        traintobuy = {Config.MetroIndex},
         job = "police" -- Remove this line if none
     },
 }
