@@ -87,7 +87,7 @@ function openMenu(index)
         end)
         RageUI.IsVisible(RageMenuTrain.Menu.Garage, function()
             for k, v in pairs(ownedTrain) do
-                if Config.Stations[index].metrostation ~= nil and Config.Stations[index].metrostation and v.trainindex ~= 25 then goto skipThisTrain end
+                if Config.Stations[index].metrostation ~= nil and Config.Stations[index].metrostation and v.trainindex ~= Config.MetroIndex then goto skipThisTrain end
                 if v.station == index then
                     RageUI.Button(string.format(Config.Lang["GetOutTrain"], v.label), string.format(Config.Lang["TrainInfos"], v.price, v.storage), {}, v.state == "in", {
                         onSelected = function()
