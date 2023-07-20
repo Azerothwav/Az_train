@@ -1,6 +1,5 @@
 local trainTable = {}
 
-local sizeTableToSave = 0
 AddEventHandler("onResourceStart", function(resourceName)
     if resourceName == GetCurrentResourceName() then
         local result = json.decode(LoadResourceFile(GetCurrentResourceName(), "trains.json"))
@@ -17,7 +16,6 @@ AddEventHandler("onResourceStart", function(resourceName)
                     end
                 end
             end
-            sizeTableToSave = #trainTable
         end
     end
 end)
@@ -25,11 +23,8 @@ end)
 CreateThread(function()
     while true do
         Wait(3600000)
-        if sizeTableToSave ~= #trainTable then
-            sizeTableToSave = #trainTable
-            print("Save Train Table JSON")
-            SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
-        end
+        print("Save Train Table JSON")
+        SaveResourceFile(GetCurrentResourceName(), "./trains.json", json.encode(trainTable), -1)
     end
 end)
 
