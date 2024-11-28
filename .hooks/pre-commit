@@ -1,0 +1,54 @@
+#!/bin/sh
+
+LUACHECK=$(command -v luacheck)
+LUA_FORMAT=$(command -v lua-format)
+LUACHECKRC=".luacheckrc"
+LUA_FORMAT_CONFIG=".lua-formatter.yaml"
+
+if [ -z "$LUACHECK" ]; then
+  echo "Error : 'luacheck' is not installed. Install it via 'luarocks install luacheck'."
+  exit 1
+fi
+
+if [ ! -f "$LUACHECKRC" ]; then
+  echo "Error: The file '$LUACHECKRC' is missing. Create this file to configure luacheck rules."
+  exit 1
+fi
+
+if [ -z "$LUA_FORMAT" ]; then
+  echo "Error: 'lua-format' is not installed. Install it via 'luarocks install luaformatter'."
+  exit 1
+fi
+
+echo "Lua code verification with luacheck on staged files..."
+
+files=$(git diff --cached --name-only --diff-filter=AM | grep '\.lua$' | grep -v '^ox_/' )
+
+if [ -z "$files" ]; then
+  echo "No staged Lua files to check."
+  exit 0
+fi
+
+luacheck $files --config .luacheckrc
+
+if [ $? -ne 0 ]; then
+  echo "Verification error in Lua files."
+  exit 1
+fi
+
+echo "Verification completed without errors."
+
+echo "Formatting Lua code with lua-format on staged files..."
+git diff --cached --name-only --diff-filter=AM | grep '\.lua$' | grep -v '^ox_/' | grep -v '^rcore_/' | grep -v '^qs-/' | while read file; do
+  if [ -f "$LUA_FORMAT_CONFIG" ]; then
+    $LUA_FORMAT -c "$LUA_FORMAT_CONFIG" -i "$file"
+  else
+    exit 1
+  fi
+
+  git add "$file"
+done
+
+echo "All Lua files conform. Commit ready."
+echo "Don't forget to credit Azeroth, you're using its pipeline."
+exit 0
