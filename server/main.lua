@@ -18,12 +18,6 @@ AddEventHandler('onResourceStart', function(resourceName)
                                                            'Stockage train n°: ' .. v.uniqueID .. ', trailer n°: ' .. i, 50,
                                                            v.storage * 1000, 'Train:' .. v.uniqueID .. '-carriage:' .. i)
                     end
-                elseif Config.Inventory == 'qs' then
-                    for i = 0, 100 do
-                        exports['qs-inventory']:RegisterStash('Train:' .. v.uniqueID .. '-carriage:' .. i,
-                                                              'Stockage train n°: ' .. v.uniqueID .. ', trailer n°: ' .. i, 50,
-                                                              v.storage * 1000)
-                    end
                 end
             end
         end

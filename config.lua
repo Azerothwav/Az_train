@@ -18,11 +18,9 @@ Config.OpenStash = function(uniqueID, storagekg, carriage)
                            { maxweight = storagekg * 1000, slots = 50 })
         TriggerEvent('inventory:client:SetCurrentStash', 'Train:' .. uniqueID .. '-carriage:' .. carriage)
     elseif Config.Inventory == 'qs' then
-        TriggerServerEvent('inventory:server:OpenInventory', 'stash', 'Train:' .. uniqueID .. '-carriage:' .. carriage, {
-            maxweight = storagekg * 1000, -- Max Weight In Grams
-            slots = 100 -- Max Slots
-        })
-        TriggerEvent('inventory:client:SetCurrentStash', 'Train:' .. uniqueID .. '-carriage:' .. carriage)
+        TriggerServerEvent('inventory:server:OpenInventory', 'stash', ('Stash_' .. uniqueID .. ':' .. carriage),
+                           { maxweight = storagekg * 1000, slots = 50 })
+        TriggerEvent('inventory:client:SetCurrentStash', ('Stash_' .. uniqueID .. ':' .. carriage))
     elseif Config.Inventory == 'ox' then
         exports.ox_inventory:openInventory('stash', {
             id = 'Train:' .. uniqueID .. '-carriage:' .. carriage,
